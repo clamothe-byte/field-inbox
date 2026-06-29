@@ -1,0 +1,51 @@
+{
+  "inbox": {
+    "title": "Inbox",
+    "backToInbox": "← Inbox",
+    "justNow": "Just now",
+    "minutesAgo": "{{count}}m ago",
+    "noMessages": "No messages yet",
+    "noMessagesDetail": "Messages will appear here when a product triggers a notification.",
+    "footer": "You received this email because you have an account or pending invitation with Omnipod Discover™. © Insulet Corporation. 100 Nagog Park, Acton, MA 01720 USA."
+  },
+  "template": {
+    "patient-invite": {
+      "subject": "Your invitation to join Omnipod Discover",
+      "preview": "Hi {{firstName}}, you've been invited by {{clinicName}}…",
+      "body_p1": "Hi {{firstName}},",
+      "body_p2": "You've been invited by <strong>{{clinicName}}</strong> to join <strong>Omnipod Discover™</strong>, a secure platform that lets your care team monitor your {{device}} therapy data.",
+      "body_p3": "Your invitation expires in <strong>{{expiryDays}} days</strong>.",
+      "cta": "Accept Invitation"
+    },
+    "staff-invite": {
+      "subject": "You've been added to {{clinicName}} on Omnipod Discover",
+      "preview": "Hi {{firstName}}, you now have {{role}} access…",
+      "body_p1": "Hi {{firstName}},",
+      "body_p2": "An administrator at <strong>{{clinicName}}</strong> has added you to <strong>Omnipod Discover™</strong> as a <strong>{{role}}</strong>.",
+      "cta": "Sign In to Omnipod Discover",
+      "body_p3": "If you believe this was sent in error, you can safely ignore this email."
+    },
+    "staff-approval": {
+      "subject": "Your Omnipod Discover access has been approved",
+      "preview": "Hi {{firstName}}, your access request for {{clinicName}} was approved…",
+      "body_p1": "Hi {{firstName}},",
+      "body_p2": "Your request to join <strong>{{clinicName}}</strong> on <strong>Omnipod Discover™</strong> has been approved. You now have access as a <strong>{{role}}</strong>.",
+      "cta": "Sign In Now"
+    },
+    "staff-rejection": {
+      "subject": "Update on your Omnipod Discover access request",
+      "preview": "Hi {{firstName}}, we wanted to follow up on your recent access request…",
+      "body_p1": "Hi {{firstName}},",
+      "body_p2": "We wanted to let you know that your request to access <strong>Omnipod Discover™</strong> has not been approved at this time.",
+      "body_p3": "If you believe this was an error, please contact your clinic administrator for assistance."
+    },
+    "forgot-password": {
+      "subject": "Reset your Omnipod Discover password",
+      "preview": "Hi {{firstName}}, we received a request to reset your password…",
+      "body_p1": "Hi {{firstName}},",
+      "body_p2": "We received a request to reset the password for your <strong>Omnipod Discover™</strong> account.",
+      "cta": "Reset Password",
+      "body_p3": "This link expires in 24 hours. If you didn't request a password reset, you can safely ignore this email — your account remains secure."
+    }
+  }
+}

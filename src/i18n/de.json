@@ -1,0 +1,10 @@
+{
+  "inbox": {},
+  "template": {
+    "patient-invite": {},
+    "staff-invite": {},
+    "staff-approval": {},
+    "staff-rejection": {},
+    "forgot-password": {}
+  }
+}

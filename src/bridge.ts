@@ -1,7 +1,7 @@
 /**
  * Minimal Field bridge listener for the field-inbox artifact.
- * Handles the harness handshake and listens for harness:notification-push commands.
- * No dependency on the full FieldPrototypeBridge SDK.
+ * Implements the harness handshake and dispatches harness:command payloads
+ * to a caller-supplied command map (same pattern as FieldPrototypeBridge.init).
  */
 
 export interface NotifyPayload {
@@ -12,16 +12,14 @@ export interface NotifyPayload {
   from?: string;
 }
 
-export type NotifyHandler = (payload: NotifyPayload) => void;
+export type CommandMap = Record<string, (params: unknown) => void>;
 
 function extractPayload(data: unknown): Record<string, unknown> | null {
   if (!data || typeof data !== "object") return null;
   const msg = data as Record<string, unknown>;
-  // Canonical envelope: { protocol: "field-harness-protocol", payload: { type, ... } }
   if (msg.protocol === "field-harness-protocol" && msg.payload && typeof msg.payload === "object") {
     return msg.payload as Record<string, unknown>;
   }
-  // Bare message (starts with harness:, prototype:, etc.)
   if (typeof msg.type === "string") return msg;
   return null;
 }
@@ -29,25 +27,28 @@ function extractPayload(data: unknown): Record<string, unknown> | null {
 export function initBridge(
   id: string,
   name: string,
-  onNotify: NotifyHandler,
+  commands: CommandMap,
 ): () => void {
   const inIframe = window.parent !== window;
 
   if (!inIframe) {
-    // Standalone — demo mode, inject a test notification after 1s
-    setTimeout(() => {
-      onNotify({
-        channel: "email",
-        template: "patient-invite",
-        to: { name: "Rebecca Chen", email: "rebecca.chen@example.com" },
-        data: {
-          firstName: "Rebecca",
-          clinicName: "T1D Endocrinology Clinic",
-          device: "Omnipod 5",
-          expiryDays: 14,
-        },
-      });
-    }, 800);
+    // Standalone demo mode — inject a test patient-invite after 800ms
+    const notifyCmd = commands["harness:notification-push"];
+    if (notifyCmd) {
+      setTimeout(() => {
+        notifyCmd({
+          channel: "email",
+          template: "patient-invite",
+          to: { name: "Rebecca Chen", email: "rebecca.chen@example.com" },
+          data: {
+            firstName: "Rebecca",
+            clinicName: "T1D Endocrinology Clinic",
+            device: "Omnipod 5",
+            expiryDays: 14,
+          },
+        });
+      }, 800);
+    }
     return () => {};
   }
 
@@ -58,35 +59,26 @@ export function initBridge(
 
     if (payload.type === "harness:handshake-request") {
       window.parent.postMessage(
-        {
-          type: "prototype:handshake-response",
-          manifest: { id, name, version: "1.0.0" },
-        },
+        { type: "prototype:handshake-response", manifest: { id, name, version: "1.0.0" } },
         "*",
       );
     }
 
-    if (
-      payload.type === "harness:command" &&
-      payload.commandId === "harness:notification-push"
-    ) {
-      const params = (payload.params ?? {}) as NotifyPayload;
-      onNotify(params);
-      // Ack so Field knows the command landed
+    if (payload.type === "harness:command") {
+      const commandId = String(payload.commandId ?? "");
+      const params = payload.params;
+      const handler = commands[commandId];
+      if (handler) {
+        try { handler(params); } catch (e) { console.error("[field-inbox bridge] command error:", commandId, e); }
+      }
       window.parent.postMessage(
-        {
-          type: "prototype:command-ack",
-          commandId: payload.commandId,
-          status: "ok",
-          nonce,
-        },
+        { type: "prototype:command-ack", commandId, status: "ok", nonce },
         "*",
       );
     }
   };
 
   window.addEventListener("message", handler);
-  // Announce ready — Field responds with harness:handshake-request
   window.parent.postMessage({ type: "prototype:ready", id, version: "1.0.0" }, "*");
 
   return () => window.removeEventListener("message", handler);
