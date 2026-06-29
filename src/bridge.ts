@@ -32,22 +32,34 @@ export function initBridge(
   const inIframe = window.parent !== window;
 
   if (!inIframe) {
-    // Standalone demo mode — inject a test patient-invite after 800ms
     const notifyCmd = commands["harness:notification-push"];
     if (notifyCmd) {
+      // If opened with ?payload=<base64json> (from standalone sendNotify fallback), use that.
+      // Otherwise fall back to the built-in demo patient-invite.
+      const raw = new URLSearchParams(window.location.search).get("payload");
+      let payload: unknown = null;
+      if (raw) {
+        try {
+          payload = JSON.parse(atob(raw));
+        } catch {
+          // malformed — fall through to demo
+        }
+      }
       setTimeout(() => {
-        notifyCmd({
-          channel: "email",
-          template: "patient-invite",
-          to: { name: "Rebecca Chen", email: "rebecca.chen@example.com" },
-          data: {
-            firstName: "Rebecca",
-            clinicName: "T1D Endocrinology Clinic",
-            device: "Omnipod 5",
-            expiryDays: 14,
+        notifyCmd(
+          payload ?? {
+            channel: "email",
+            template: "patient-invite",
+            to: { name: "Rebecca Chen", email: "rebecca.chen@example.com" },
+            data: {
+              firstName: "Rebecca",
+              clinicName: "T1D Endocrinology Clinic",
+              device: "Omnipod 5",
+              expiryDays: 14,
+            },
           },
-        });
-      }, 800);
+        );
+      }, 80);
     }
     return () => {};
   }
